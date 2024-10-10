@@ -1,0 +1,98 @@
+Implementare structuri, tren, coada de comanzi
+
+Pentru a construi trenul, am folosit doua structuri astfel:
+    - in prima structura am pastrat informatia din vagon, dar si adresele urmatorului/precedentului vagon
+    - in a doua structura am retinut adresele mecanicului si a santinelei (de tip TLista)
+
+Am implementat o functie de initializare a trenului, construind santinela acestuia (InitL()), apoi am construit cu ajutorul altei functii ()
+primul vagon (Constr_vagon1)
+
+Pentru a construi coada in care retin comenzile, am implementat o urmatoarele structuri:
+    - o structura in care retin informatia dintr-o celula a listei, respectiv urmatoarea/anterioara adresa a celulei curente
+    - o structura care retine inceputul si sfarsitul cozii
+
+Pentru coada am implementat o functie de initializare a cozii (InitQ())
+
+
+Implementare functii
+    1. Operatii de tip UPDATE
+        a. MOVE_LEFT/MOVE_RIGHT 
+            In functia Muta_stanga(TTren *T) am tinut cont de cazul in care mecanicul se afla in primul vagon, mutandu-l in ultimul
+            Daca mecanicul nu se afla in primul vagon, foloseam comanda "T->p = T->p->ant"
+
+            In functia Muta_dreapta(TTren *T), daca mecanicul era in ultimul vagon, apelam functia de construire a unui vagon
+            Altfel, mutam mecanicul cu o pozitie in fata
+
+        b. WRITE <C>
+            Pentru a actualiza informatia din vagonul mecanicului, am actualizat campul info astfel " T->p->info = x"
+
+        c. CLEAR_CELL
+            Aveam doua situatii posibile: 
+                - sa fie un singur vagon in tren, iar in acest caz apelam functia Constr_vagon1
+                - sa fie mai mult de un vagon, apoi am salvat pozitia mecanicului intr-o variabila, am mutat mecanicu
+                cu o pozitie inapoi, si m-am folosit de aux pentru a reface legaturile
+        d. CLEAR_ALL
+            Am pastrat adresa ultimului vagon intr-o variabila, si am parcurs cu ajutorul acesteia trenul pana cand am ajuns la santinela
+            Pe masura ce inaintam in parcurgere, eliminam memoria din vagonul in care ma aflam si mergeam mai departe
+            La final am initializat trenul astfel incat primul vagon sa fie inscrpitionat cu "#"
+
+        e. INSERT_RIGHT/INSERT_LEFT
+            In functia Inserare_dreapta(TTren *T, char x) am folosit comanda "Inserare_vagon(T, x)", mutand dupa mecanicul la dreapta
+
+            In functia Inserare_stanga(TTren *T, char x), daca mecanicul era in primul vagon tratam cazul de eroare, 
+            iar daca nu se afla in primul vagon, construiam un vagon si actualizam legaturile astfel incat sa il pozitionez intre
+            mecanic si vagonul care se afla inainte de mecanic, si deplasam mecanicul la pozitia noului vagon inserat
+        
+    2. Operatii de tip SEARCH
+        a. SEARCH <S>
+            Pentru a parcurge o singura data tot trenul, am folosit functia nr_vagoane, care returneaza numarul de vagoane 
+            din tren. Cat timp o variabila nr initializata cu 1 era mai mica sau egala decat numarul de vagoane, parcurgeam trenul.
+            Daca vagonul avea informatia egala cu primul caracter din sirul cautat, incepeam "o secventa" si o parcurgeam cat timp vagonul curent avea informatia egala
+            cu litera din sirul de caractere
+            Dupa instructiunea while, daca contorul meu ajungea sa fie egal cu strlen(sirul cautat), returnam 1, gasind astfel secventa, si actualizam pozitia mecanicului,
+            pe care o salvasem inainte de a incepe parcurgerea secventei intr-o variabila
+            In caz contrar, reveneam la vagonul de unde a inceput secventa si inaintam in tren, crescand cu 1 numarul de vagoane parcurs
+            Daca iesea din while, inseamna ca nu a gasit nicio astfel de secventa si afisam mesajul "ERROR", returnand 0
+
+        b. SEARCH_LEFT/SEARCH_RIGHT
+            Principiul este acelasi ca la cautarea de tip SEARCH, numai ca difera conditia de parcurgere.
+            De data aceasta trebuie sa parcurg trenul cat timp ajungeam la santinela.
+            Daca gaseam secventa dorita, mutam mecanicul la ultimul caracter din sir
+        
+    3. Operatii de tip QUERY
+        a. SHOW_CURRENT
+            In functia Afiseaza_mecanic(TTren *T) am afisat T->p->info
+
+        b. SHOW
+            In functia Afiseaza(TTren *T) am inceput parcurgerea trenului folosindu-ma de un *p care pointa la adresa
+            primului vagon, iar cat timp p era diferit de santinela, verificam daca e mecanicul aflat in vagonul curent pentru a tine
+            cont ca la afisare trebuie evidentiat prin |mecanic|.
+        
+        c. SWITCH
+            Pentru a implementa aceasta comanda, am creat doua functii:
+                - o functie prin care eliminam elementele de la sfarstiul cozii spre inceput
+                - functia "TCoada* Inversare_coada(TCoada *c)", prin care construiam o alta coada care are informatia inversata fata de 
+                coada initiala; pe masura ce parcurgeam coada initiala, introduceam in coada inversata informatia din cea curenta, apoi eliminam
+                elementul de la sfarsiul cozii initiale
+    
+    4. Operatia EXECUTE
+        
+        Pentru aceasta comanda am folosit coada dublu inlantuita implementata astfel:
+            - in fiecare celula retineam argumentul comenzilor (in cazul in care o comanda nu avea argument, retineam caracterul ' '), dar si "un cod" pentru fiecare: 
+                MOVE_LEFT = 1
+                MOVE_RIGHT = 2
+                INSERT_LEFT = 3
+                INSERT_RIGHT = 4
+                CLEAR_CELL = 5
+                CLEAR_ALL = 6
+                SEARCH = 7
+                SEARCH_LEFT = 8
+                SEARCH_RIGHT = 9
+                WRITE = 10
+            - pe masura ce citeam din fisier comenzile, comparam sirul de caractere citit cu fiecare comanda de mai sus, si astfel
+            introduceam in coada argumentul respectivei comenzi, respectiv "codul" ei.
+            - cand sirul meu de caractere era "EXECUTE", incepea extragerea elementelor din coada pe rand, apeland functia gasita dupa
+            codul meu implementat mai sus; de exemplu "if (c->inc->info == 6)", ne indica faptul ca trebuie sa apelam comanda CLEAR_ALL.
+
+
+    
